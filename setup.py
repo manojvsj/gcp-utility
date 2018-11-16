@@ -23,7 +23,7 @@ setup(
     version='1.1.0',  # Required
     description='GCP utility will give additional custom features over gcs',  # Required
     long_description=long_description,  # Optional
-    url='https://github.com/pypa/sampleproject',  # Optional
+    url='https://github.com/manojvsj/gcp-utility.git',  # Optional
     author='Manojkumar vadivel',  # Optional
     author_email='manojkumar.vsj@gmail.com',  # Optional
     classifiers=[  # Optional
@@ -46,7 +46,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
-    keywords='sample setuptools development',  # Optional
+    keywords='bigquery backfill, gcp',  # Optional
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # Required
     install_requires=['google-cloud==0.32.0', 'Jinja2==2.10'],  # Optional
     extras_require={  # Optional
@@ -63,9 +63,9 @@ setup(
         ],
     },
     project_urls={  # Optional
-        'Bug Reports': 'https://github.com/pypa/sampleproject/issues',
+        'Bug Reports': 'https://github.com/manojvsj/gcp-utility/issues',
         'Funding': 'https://donate.pypi.org',
         'Say Thanks!': 'http://saythanks.io/to/example',
-        'Source': 'https://github.com/pypa/sampleproject/',
+        'Source': 'https://github.com/manojvsj/gcp-utility.git',
     },
 )
