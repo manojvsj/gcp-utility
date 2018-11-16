@@ -32,23 +32,22 @@ Jinja2==2.10
 Use virtualenv to Install the dependancy packages 
 
 ```
-git clone https://gitlab.com/manojvsj/GCPUtility.git
-cd GCPUtility
+pip install virtualenv
 virtualenv venv
-activate ./venv/bin/activate
-pip install -e .
+. ./venv/bin/activate
 ```
-##### Linux/Mac: 
-```bash
-virtualenv venv
-activate ./venv/bin/activate
-pip install -e .
+
 ```
 ##### Windows:
-```
+python -m pip install virtualenv
 python -m virtualenv venv
 activate ./venv/Scripts/activate
-python -m pip install -e .
+```
+
+Install bq_client command line tool using pip
+
+```bash
+pip install gcp-utility
 ```
 
 -h command will return the help content which contains all the available  options
