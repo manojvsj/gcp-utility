@@ -20,7 +20,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
 
     name='gcp-utility',  # Required
-    version='1.1.0',  # Required
+    version='1.1.1',  # Required
     description='GCP utility will give additional custom features over gcs',  # Required
     long_description=long_description,  # Optional
     url='https://github.com/manojvsj/gcp-utility.git',  # Optional
