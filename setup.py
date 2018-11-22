@@ -48,7 +48,7 @@ setup(
     ],
     keywords='bigquery backfill, gcp',  # Optional
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # Required
-    install_requires=['google-cloud==0.32.0', 'Jinja2==2.10'],  # Optional
+    install_requires=['google-api-core==1.5.2', 'google-cloud-bigquery==1.7.0', 'Jinja2==2.10'],  # Optional
     extras_require={  # Optional
         'dev': ['check-manifest'],
         'test': ['coverage'],

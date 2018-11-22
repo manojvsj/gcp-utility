@@ -54,16 +54,24 @@ class BigQueryUtils:
                        dest_table_id,
                        flattern_results=True,
                        write_disposition='WRITE_TRUNCATE',
+                       create_disposition = 'CREATE_IF_NEEDED',
+                       time_partitioning = None,
+                       time_partitioning_field = None,
+                       clustering_fields = None,
                        use_standard_sql=False):
         """
-        Loading data from specified query to destination table.
-        if you want to create date partition tables run this command before -> bq mk --time_partitioning_type=DAY dataset.table
-        :param bq_client: service object
+
+        :param bq_client:
         :param query:
         :param dest_dataset_id:
         :param dest_table_id:
+        :param flattern_results:
         :param write_disposition:
-        :param use_legacy_sql:
+        :param create_disposition:
+        :param time_partitioning:
+        :param time_partitioning_field:
+        :param clustering_fields: list
+        :param use_standard_sql:
         :return:
         """
         try:
@@ -80,9 +88,14 @@ class BigQueryUtils:
             dest_table_ref = dest_dataset_ref.table(dest_table_id)
             #table = bigquery.Table(dest_table_ref)
             job_config.destination = dest_table_ref
-            job_config.flatten_results = flattern_results
+            #job_config.flatten_results = flattern_results
             # Allow the results table to be overwritten.
             job_config.write_disposition = write_disposition
+            job_config.create_disposition = create_disposition
+
+            if time_partitioning is not None:
+                job_config.time_partitioning = bigquery.table.TimePartitioning(type_=time_partitioning, field=time_partitioning_field)
+                job_config.clustering_fields = clustering_fields
             if use_standard_sql:
                 job_config.use_legacy_sql = False
             query_job = client.query(query, job_config=job_config)

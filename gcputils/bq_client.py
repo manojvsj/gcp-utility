@@ -70,7 +70,11 @@ class BigQueryClient:
                                                      dest_dataset_id=dataset_id,
                                                      dest_table_id=table_id,
                                                      flattern_results=args.flattern_results,
-                                                     write_disposition=args.write_desposition,
+                                                     write_disposition=args.write_disposition,
+                                                     create_disposition=args.create_disposition,
+                                                     time_partitioning=args.partition_type,
+                                                     time_partitioning_field=args.partition_field,
+                                                     clustering_fields=args.clustering_fields.split(','),
                                                      use_standard_sql=bool(args.ssql))
                         logging.info("Successfully completed for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d  ")))
                     except Exception, e:
@@ -90,7 +94,15 @@ def main():
     parser.add_argument("-p", "--project_id", default=None, dest="project", help="provide valid project id")
     parser.add_argument("-ssql", "--standard-sql", dest="ssql", default=False, action="store_true", help="Mention if using Standard sql")
     parser.add_argument("-d", "--destination-table", dest="destination_table", help="<projectname>:<datasetid>.<tableid> provide valid destination project-id")
-    parser.add_argument("-w", "--write-desposition", default='WRITE_IF_EMPTY', dest="write_desposition", help="Write disposition value")
+    parser.add_argument("-w", "--write-disposition", default='WRITE_IF_EMPTY', dest="write_disposition", help="Write disposition value")
+    parser.add_argument("-c", "--create-disposition", default='CREATE_IF_NEEDED', dest="create_disposition",
+                        help="create disposition value")
+    parser.add_argument("-ptype", "--partitioning-type", default=None, dest="partition_type",
+                        help="Partitioning type for the table")
+    parser.add_argument("-pfield", "--partitioning-field", default=None, dest="partition_field",
+                        help="Main partitioning field value if none then default value will be taken")
+    parser.add_argument("-cfields", "--clustering-fields", default=None, dest="clustering_fields",
+                        help="clustering fields in comma seperated format ex: col1,col2")
     parser.add_argument("-qf", "--query-file", dest="query_file", help="provide bigquery sql filepath")
     parser.add_argument("-t", "--template", default={}, dest="template", help="provide template values")
     parser.add_argument("-tf", "--template-file", dest="template_file", help="provide template file path")
