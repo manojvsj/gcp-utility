@@ -95,7 +95,9 @@ class BigQueryUtils:
 
             if time_partitioning is not None:
                 job_config.time_partitioning = bigquery.table.TimePartitioning(type_=time_partitioning, field=time_partitioning_field)
-                job_config.clustering_fields = clustering_fields
+                job_config.clustering_fields = clustering_fields.split(',') if clustering_fields is not None else None
+
+            job_config.use_legacy_sql = True
             if use_standard_sql:
                 job_config.use_legacy_sql = False
             query_job = client.query(query, job_config=job_config)

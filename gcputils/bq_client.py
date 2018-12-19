@@ -1,6 +1,7 @@
 import argparse
 import sys
 import logging
+import pkg_resources
 from utils.bigquery_utils import BigQueryUtils
 from utils.common_utils import *
 
@@ -41,54 +42,56 @@ class BigQueryClient:
         :param args: Namespace object which contains list of arguments
         :return:
         """
-        start_date = self.start_date
-        end_date = self.end_date
-        while end_date >= start_date: # backfilling
-            logging.info("Executing query for {}".format(datetime.strftime(start_date, "%Y-%d-%m")))
+        try:
+            start_date = self.start_date
+            end_date = self.end_date
+            while end_date >= start_date: # backfilling
+                logging.info("Executing query for {}".format(datetime.strftime(start_date, "%Y-%d-%m")))
 
-            if args.query or args.query_file:
+                if args.query or args.query_file:
 
-                query_string = apply_template_values(args.query if args.query else self.read_from_file(args.query_file), execution_date=start_date)
+                    query_string = apply_template_values(args.query if args.query else self.read_from_file(args.query_file), execution_date=start_date)
+                    if args.destination_table:
+                        try:
+                            assert len(args.destination_table.split(':')) <= 1
+                            assert len(args.destination_table.split('.')) == 2
+                        except Exception, e:
+                            raise argparse.ArgumentError("destination table is not in proper format <datasetid>.<tableid>")
 
-                if args.destination_table:
-                    try:
-                        assert len(args.destination_table.split(':')) <= 1
-                        assert len(args.destination_table.split('.')) == 2
-                    except Exception, e:
-                        raise argparse.ArgumentError("destination table is not in proper format <datasetid>.<tableid>")
+                        dataset_id, table_id = args.destination_table.split('.')
 
-                    dataset_id, table_id = args.destination_table.split('.')
-
-                    table_id = apply_template_values(table_id, self.template_fields, execution_date=start_date)
-                    logging.info("----------------------------")
-                    logging.info("table name - %s", table_id)
-                    logging.info("----------------------------")
-                    try:
-                        logging.info("bq job initiated for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d")))
-                        self.bq_utils.query_to_table(self.service,
-                                                     query=query_string,
-                                                     dest_dataset_id=dataset_id,
-                                                     dest_table_id=table_id,
-                                                     flattern_results=args.flattern_results,
-                                                     write_disposition=args.write_disposition,
-                                                     create_disposition=args.create_disposition,
-                                                     time_partitioning=args.partition_type,
-                                                     time_partitioning_field=args.partition_field,
-                                                     clustering_fields=args.clustering_fields.split(','),
-                                                     use_standard_sql=bool(args.ssql))
-                        logging.info("Successfully completed for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d  ")))
-                    except Exception, e:
-                        logging.info("Something went wrong for date {}".format(datetime.strftime(start_date, "%Y-%m-%d")))
-                        logging.info(e)
-            else:
-                logging.info("Please provide destination details")
+                        table_id = apply_template_values(table_id, self.template_fields, execution_date=start_date)
+                        logging.info("----------------------------")
+                        logging.info("table name - %s", table_id)
+                        logging.info("----------------------------")
+                        try:
+                            logging.info("bq job initiated for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d")))
+                            self.bq_utils.query_to_table(self.service,
+                                                         query=query_string,
+                                                         dest_dataset_id=dataset_id,
+                                                         dest_table_id=table_id,
+                                                         flattern_results=args.flattern_results,
+                                                         write_disposition=args.write_disposition,
+                                                         create_disposition=args.create_disposition,
+                                                         time_partitioning=args.partition_type,
+                                                         time_partitioning_field=args.partition_field,
+                                                         clustering_fields=args.clustering_fields,
+                                                         use_standard_sql=bool(args.ssql))
+                            logging.info("Successfully completed for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d  ")))
+                        except Exception, e:
+                            logging.info("Something went wrong for date {}".format(datetime.strftime(start_date, "%Y-%m-%d")))
+                            logging.info(e)
+                else:
+                    logging.info("Please provide destination details")
 
 
-            start_date = start_date + timedelta(1)
+                start_date = start_date + timedelta(1)
+        except Exception as e:
+            print e
 
 
 def main():
-    parser = argparse.ArgumentParser(version="0.1", description="Bq utility tool")
+    parser = argparse.ArgumentParser(version=pkg_resources.require("gcp-utility")[0].version, description="Bq utility tool")
     parser.add_argument("-q", "--query", dest="query", help="provide valid bigquery sql")
     parser.add_argument("-f", "--no-flattern", dest="flattern_results", action="store_true", default=True, help="Flattern results")
     parser.add_argument("-p", "--project_id", default=None, dest="project", help="provide valid project id")
