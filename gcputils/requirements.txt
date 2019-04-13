@@ -1,2 +1,2 @@
 google-cloud==0.32.0
-Jinja2==2.10
+Jinja2==2.10.1
