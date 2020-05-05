@@ -20,14 +20,14 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
 
     name='gcp-utility',  # Required
-    version='1.1.7',  # Required
+    version='2.0.3',  # Required
     description='GCP utility will give additional custom features over gcs',  # Required
     long_description=long_description,  # Optional
     url='https://github.com/pypa/sampleproject',  # Optional
     author='Manojkumar vadivel',  # Optional
     author_email='manojkumar.vsj@gmail.com',  # Optional
     long_description_content_type="text/markdown",
-    python_requires='>=2.6,<3',
+    python_requires='>=3',
     classifiers=[  # Optional
         # How mature is this project? Common values are
         #   3 - Alpha
@@ -41,8 +41,10 @@ setup(
 
         # Pick your license as you wish
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7'
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
     keywords='sample setuptools development',  # Optional
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # Required

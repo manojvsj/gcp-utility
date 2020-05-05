@@ -1,16 +1,17 @@
 import argparse
 import sys
 import logging
-import pkg_resources
 from utils.bigquery_utils import BigQueryUtils
 from utils.common_utils import *
+from gcputils.utils.bigquery_utils import *
+from gcputils.utils.common_utils import *
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 class BigQueryClient:
 
-    def __init__(self, args):
+    def  __init__(self, args):
         """
 
         :param args: argparse Namespace instance which contains list of command line args
@@ -42,70 +43,60 @@ class BigQueryClient:
         :param args: Namespace object which contains list of arguments
         :return:
         """
-        try:
-            start_date = self.start_date
-            end_date = self.end_date
-            while end_date >= start_date: # backfilling
-                logging.info("Executing query for {}".format(datetime.strftime(start_date, "%Y-%d-%m")))
+        start_date = self.start_date
+        end_date = self.end_date
+        while end_date >= start_date: # backfilling
+            logging.info("Executing query for {}".format(datetime.strftime(start_date, "%Y-%d-%m")))
 
-                if args.query or args.query_file:
+            if args.query or args.query_file:
 
-                    query_string = apply_template_values(args.query if args.query else self.read_from_file(args.query_file), execution_date=start_date)
-                    if args.destination_table:
-                        try:
-                            assert len(args.destination_table.split(':')) <= 1
-                            assert len(args.destination_table.split('.')) == 2
-                        except Exception, e:
-                            raise argparse.ArgumentError("destination table is not in proper format <datasetid>.<tableid>")
+                query_string = apply_template_values(args.query if args.query else self.read_from_file(args.query_file), execution_date=start_date)
 
-                        dataset_id, table_id = args.destination_table.split('.')
+                if args.destination_table:
+                    try:
+                        assert len(args.destination_table.split(':')) <= 1
+                        assert len(args.destination_table.split('.')) == 2
+                    except Exception as e:
+                        raise argparse.ArgumentError("destination table is not in proper format <datasetid>.<tableid>")
 
-                        table_id = apply_template_values(table_id, self.template_fields, execution_date=start_date)
-                        logging.info("----------------------------")
-                        logging.info("table name - %s", table_id)
-                        logging.info("----------------------------")
-                        try:
-                            logging.info("bq job initiated for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d")))
-                            self.bq_utils.query_to_table(self.service,
-                                                         query=query_string,
-                                                         dest_dataset_id=dataset_id,
-                                                         dest_table_id=table_id,
-                                                         flattern_results=args.flattern_results,
-                                                         write_disposition=args.write_disposition,
-                                                         create_disposition=args.create_disposition,
-                                                         time_partitioning=args.partition_type,
-                                                         time_partitioning_field=args.partition_field,
-                                                         clustering_fields=args.clustering_fields,
-                                                         use_standard_sql=bool(args.ssql))
-                            logging.info("Successfully completed for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d  ")))
-                        except Exception, e:
-                            logging.info("Something went wrong for date {}".format(datetime.strftime(start_date, "%Y-%m-%d")))
-                            logging.info(e)
-                else:
-                    logging.info("Please provide destination details")
+                    dataset_id, table_id = args.destination_table.split('.')
+
+                    table_id = apply_template_values(table_id, self.template_fields, execution_date=start_date)
+                    logging.info("----------------------------")
+                    logging.info("table name - %s", table_id)
+                    logging.info("----------------------------")
+                    try:
+
+                        logging.info("bq job initiated for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d")))
+                        self.bq_utils.query_to_table(self.service,
+                                                     query=query_string,
+                                                     dest_dataset_id=dataset_id,
+                                                     dest_table_id=table_id,
+                                                     flattern_results=args.flattern_results,
+                                                     write_disposition=args.write_desposition,
+                                                     use_standard_sql=bool(args.ssql),
+                                                     is_dml=bool(args.dml))
+                        logging.info("Successfully completed for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d  ")))
+                    except Exception as e:
+                        logging.info("Something went wrong for date {}".format(datetime.strftime(start_date, "%Y-%m-%d")))
+                        logging.info(e)
+            else:
+                logging.info("Please provide destination details")
 
 
-                start_date = start_date + timedelta(1)
-        except Exception as e:
-            print e
+            start_date = start_date + timedelta(1)
 
 
 def main():
-    parser = argparse.ArgumentParser(version=pkg_resources.require("gcp-utility")[0].version, description="Bq utility tool")
+    parser = argparse.ArgumentParser()
     parser.add_argument("-q", "--query", dest="query", help="provide valid bigquery sql")
     parser.add_argument("-f", "--no-flattern", dest="flattern_results", action="store_true", default=True, help="Flattern results")
     parser.add_argument("-p", "--project_id", default=None, dest="project", help="provide valid project id")
     parser.add_argument("-ssql", "--standard-sql", dest="ssql", default=False, action="store_true", help="Mention if using Standard sql")
+    parser.add_argument("-dml", "--dml-statement", dest="dml", default=False, action="store_true",
+                        help="Mention if using DML statements in your query")
     parser.add_argument("-d", "--destination-table", dest="destination_table", help="<projectname>:<datasetid>.<tableid> provide valid destination project-id")
-    parser.add_argument("-w", "--write-disposition", default='WRITE_IF_EMPTY', dest="write_disposition", help="Write disposition value")
-    parser.add_argument("-c", "--create-disposition", default='CREATE_IF_NEEDED', dest="create_disposition",
-                        help="create disposition value")
-    parser.add_argument("-ptype", "--partitioning-type", default=None, dest="partition_type",
-                        help="Partitioning type for the table")
-    parser.add_argument("-pfield", "--partitioning-field", default=None, dest="partition_field",
-                        help="Main partitioning field value if none then default value will be taken")
-    parser.add_argument("-cfields", "--clustering-fields", default=None, dest="clustering_fields",
-                        help="clustering fields in comma seperated format ex: col1,col2")
+    parser.add_argument("-w", "--write-desposition", default='WRITE_IF_EMPTY', dest="write_desposition", help="Write disposition value")
     parser.add_argument("-qf", "--query-file", dest="query_file", help="provide bigquery sql filepath")
     parser.add_argument("-t", "--template", default={}, dest="template", help="provide template values")
     parser.add_argument("-tf", "--template-file", dest="template_file", help="provide template file path")
@@ -131,4 +122,7 @@ def main():
     #     if timeout == 0.0:
     #         print 'Please wait...'
     #         timeout = 30.0
+
+if __name__ == "__main__":
+    main()
 

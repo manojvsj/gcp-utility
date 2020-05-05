@@ -54,24 +54,17 @@ class BigQueryUtils:
                        dest_table_id,
                        flattern_results=True,
                        write_disposition='WRITE_TRUNCATE',
-                       create_disposition = 'CREATE_IF_NEEDED',
-                       time_partitioning = None,
-                       time_partitioning_field = None,
-                       clustering_fields = None,
-                       use_standard_sql=False):
+                       use_standard_sql=False,
+                       is_dml=False):
         """
-
-        :param bq_client:
+        Loading data from specified query to destination table.
+        if you want to create date partition tables run this command before -> bq mk --time_partitioning_type=DAY dataset.table
+        :param bq_client: service object
         :param query:
         :param dest_dataset_id:
         :param dest_table_id:
-        :param flattern_results:
         :param write_disposition:
-        :param create_disposition:
-        :param time_partitioning:
-        :param time_partitioning_field:
-        :param clustering_fields: list
-        :param use_standard_sql:
+        :param use_legacy_sql:
         :return:
         """
         try:
@@ -87,19 +80,16 @@ class BigQueryUtils:
             dest_dataset_ref = client.dataset(dest_dataset_id)
             dest_table_ref = dest_dataset_ref.table(dest_table_id)
             #table = bigquery.Table(dest_table_ref)
-            job_config.destination = dest_table_ref
-            #job_config.flatten_results = flattern_results
+
+            # BQ won't allow table disposition & destination for DML statements
+            if not is_dml:
+                job_config.destination = dest_table_ref
+                job_config.write_disposition = write_disposition
+
+            job_config.flatten_results = flattern_results
             # Allow the results table to be overwritten.
-            job_config.write_disposition = write_disposition
-            job_config.create_disposition = create_disposition
+            job_config.use_legacy_sql = not use_standard_sql
 
-            if time_partitioning is not None:
-                job_config.time_partitioning = bigquery.table.TimePartitioning(type_=time_partitioning, field=time_partitioning_field)
-                job_config.clustering_fields = clustering_fields.split(',') if clustering_fields is not None else None
-
-            job_config.use_legacy_sql = True
-            if use_standard_sql:
-                job_config.use_legacy_sql = False
             query_job = client.query(query, job_config=job_config)
             logging.info("job status %s", query_job.state)
 
@@ -109,11 +99,11 @@ class BigQueryUtils:
                 if query_job.state == 'DONE':
                     break
             logging.info("Job completed successfully")
-        except Exception, e:
+        except Exception as e:
             logging.info(e)
             logging.info("please create date partition table before loading datainto it")
             logging.info("bq mk --time_partitioning_type=DAY dataset.table")
-            raise Exception(e)
+            raise Exception(e.errors)
 
 
 

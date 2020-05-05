@@ -16,17 +16,6 @@ Following are the available date templates you can use it in your query.
 
 ## Getting Started
 
-
-### Prerequisites
-
-What things you need to install the software and how to install them
-
-```
-python 2.7
-google-cloud==0.32.0
-Jinja2==2.10
-```
-
 ### Installing
 
 Use virtualenv to Install the dependancy packages 
@@ -41,7 +30,7 @@ virtualenv venv
 ##### Windows:
 python -m pip install virtualenv
 python -m virtualenv venv
-activate ./venv/Scripts/activate
+./venv/Scripts/activate
 ```
 
 Install bq_client command line tool using pip
@@ -60,15 +49,22 @@ End with an example of getting some data out of the system or using it for a lit
 ## Available option
 
 ```bash
--h, --help            show this help message and exit
-  -v, --version         show program's version number and exit
+usage: bq_client.py [-h] [-q QUERY] [-f] [-p PROJECT] [-ssql] [-dml]
+                    [-d DESTINATION_TABLE] [-w WRITE_DESPOSITION]
+                    [-qf QUERY_FILE] [-t TEMPLATE] [-tf TEMPLATE_FILE]
+                    [-s START_DATE] [-e END_DATE] [-sf SERVICE_ACCOUNT_PATH]
+
+optional arguments:
+  -h, --help            show this help message and exit
   -q QUERY, --query QUERY
                         provide valid bigquery sql
   -f, --no-flattern     Flattern results
   -p PROJECT, --project_id PROJECT
                         provide valid project id
-  -ssql SSQL, --standard-sql SSQL
+  -ssql, --standard-sql
                         Mention if using Standard sql
+  -dml, --dml-statement
+                        Mention if using DML statements in your query
   -d DESTINATION_TABLE, --destination-table DESTINATION_TABLE
                         <projectname>:<datasetid>.<tableid> provide valid
                         destination project-id
@@ -122,4 +118,12 @@ Pass start-date and end-date to script, it will backfill the data.
 ```
 bq_client --query-file sample.sql -p projectid -d dest_datasetid.tableid -s 2018-02-02 -e 2018-02-10
 
+```
+
+### Development 
+What things you need to install the software and how to install them
+
+```
+google-cloud-bigquery==1.24.0
+Jinja2==2.11.2
 ```
