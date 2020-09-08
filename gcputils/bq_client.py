@@ -96,7 +96,7 @@ def main():
     parser.add_argument("-dml", "--dml-statement", dest="dml", default=False, action="store_true",
                         help="Mention if using DML statements in your query")
     parser.add_argument("-d", "--destination-table", dest="destination_table", help="<projectname>:<datasetid>.<tableid> provide valid destination project-id")
-    parser.add_argument("-w", "--write-desposition", default='WRITE_IF_EMPTY', dest="write_desposition", help="Write disposition value")
+    parser.add_argument("-w", "--write-desposition", default='WRITE_EMPTY', dest="write_desposition", help="Write disposition value")
     parser.add_argument("-qf", "--query-file", dest="query_file", help="provide bigquery sql filepath")
     parser.add_argument("-t", "--template", default={}, dest="template", help="provide template values")
     parser.add_argument("-tf", "--template-file", dest="template_file", help="provide template file path")
