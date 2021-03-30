@@ -44,14 +44,16 @@ class BigQueryClient:
         """
         start_date = self.start_date
         end_date = self.end_date
-        while end_date >= start_date: # backfilling
+        dataset_id = None
+        table_id = None
+        while end_date >= start_date:  # backfilling
             logging.info("Executing query for {}".format(datetime.strftime(start_date, "%Y-%d-%m")))
 
             if args.query or args.query_file:
 
                 query_string = apply_template_values(args.query if args.query else self.read_from_file(args.query_file), execution_date=start_date)
 
-                if args.destination_table:
+                if args.destination_table and not args.dml:
                     try:
                         assert len(args.destination_table.split(':')) <= 1
                         assert len(args.destination_table.split('.')) == 2
@@ -64,24 +66,24 @@ class BigQueryClient:
                     logging.info("----------------------------")
                     logging.info("table name - %s", table_id)
                     logging.info("----------------------------")
-                    try:
+                try:
 
-                        logging.info("bq job initiated for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d")))
-                        self.bq_utils.query_to_table(self.service,
-                                                     query=query_string,
-                                                     dest_dataset_id=dataset_id,
-                                                     dest_table_id=table_id,
-                                                     flattern_results=args.flattern_results,
-                                                     write_disposition=args.write_desposition,
-                                                     use_standard_sql=bool(args.ssql),
-                                                     is_dml=bool(args.dml))
-                        logging.info("Successfully completed for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d  ")))
-                    except Exception as e:
-                        logging.info("Something went wrong for date {}".format(datetime.strftime(start_date, "%Y-%m-%d")))
-                        logging.info(e)
+                    logging.info("bq job initiated for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d")))
+                    self.bq_utils.query_to_table(self.service,
+                                                 query=query_string,
+                                                 dest_dataset_id=dataset_id,
+                                                 dest_table_id=table_id,
+                                                 flattern_results=args.flattern_results,
+                                                 write_disposition=args.write_desposition,
+                                                 use_standard_sql=bool(args.ssql),
+                                                 is_dml=bool(args.dml))
+                    logging.info(
+                        "Successfully completed for date - {}".format(datetime.strftime(start_date, "%Y-%m-%d  ")))
+                except Exception as e:
+                    logging.info("Something went wrong for date {}".format(datetime.strftime(start_date, "%Y-%m-%d")))
+                    logging.info(e)
             else:
                 logging.info("Please provide destination details")
-
 
             start_date = start_date + timedelta(1)
 
@@ -121,6 +123,7 @@ def main():
     #     if timeout == 0.0:
     #         print 'Please wait...'
     #         timeout = 30.0
+
 
 if __name__ == "__main__":
     main()

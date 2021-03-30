@@ -50,8 +50,8 @@ class BigQueryUtils:
     def query_to_table(self,
                        bq_client,
                        query,
-                       dest_dataset_id,
-                       dest_table_id,
+                       dest_dataset_id=None,
+                       dest_table_id=None,
                        flattern_results=True,
                        write_disposition='WRITE_TRUNCATE',
                        use_standard_sql=False,
@@ -67,22 +67,27 @@ class BigQueryUtils:
         :param use_legacy_sql:
         :return:
         """
+
         try:
             client = bq_client
             job_config = bigquery.QueryJobConfig()
-            logging.info("destination table id - {}".format(dest_table_id))
-            logging.info("destination dataset id - {}".format(dest_dataset_id))
 
             # Allow for query results larger than the maximum response size.
-            job_config.allow_large_results = True
+
 
             # When large results are allowed, a destination table must be set.
-            dest_dataset_ref = client.dataset(dest_dataset_id)
-            dest_table_ref = dest_dataset_ref.table(dest_table_id)
-            #table = bigquery.Table(dest_table_ref)
 
             # BQ won't allow table disposition & destination for DML statements
             if not is_dml:
+                if dest_table_id is None or dest_dataset_id is None :
+                    logging.error("destination table or dataset should not be none")
+                    raise Exception("destination table or dataset should not be none")
+
+                logging.info("destination table id - {}".format(dest_table_id))
+                logging.info("destination dataset id - {}".format(dest_dataset_id))
+                job_config.allow_large_results = True
+                dest_dataset_ref = client.dataset(dest_dataset_id)
+                dest_table_ref = dest_dataset_ref.table(dest_table_id)
                 job_config.destination = dest_table_ref
                 job_config.write_disposition = write_disposition
 
