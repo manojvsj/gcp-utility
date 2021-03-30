@@ -46,7 +46,7 @@ setup(
     ],
     keywords='sample setuptools development',  # Optional
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),  # Required
-    install_requires=['google-cloud-bigquery==1.24.0', 'Jinja2==2.11.2'],  # Optional
+    install_requires=['google-cloud-bigquery==1.24.0', 'Jinja2==2.11.3'],  # Optional
     extras_require={  # Optional
         'dev': ['check-manifest'],
         'test': ['coverage'],
