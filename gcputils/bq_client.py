@@ -11,7 +11,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 class BigQueryClient:
 
-    def  __init__(self, args):
+    def __init__(self, args):
         """
 
         :param args: argparse Namespace instance which contains list of command line args
@@ -27,7 +27,6 @@ class BigQueryClient:
             self.service = self.bq_utils.get_connection(service_account_file_path=args.service_account_path)
         else:
             self.service = self.bq_utils.get_connection()
-
 
     def read_from_file(self, file_path):
         """

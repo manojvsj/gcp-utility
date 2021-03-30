@@ -20,7 +20,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
 
     name='gcp-utility',  # Required
-    version='1.1.8',  # Required
+    version='2.0.4',  # Required
     description='GCP utility will give additional custom features over gcs',  # Required
     long_description=long_description,  # Optional
     url='https://github.com/pypa/sampleproject',  # Optional
